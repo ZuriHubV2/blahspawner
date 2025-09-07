@@ -1,0 +1,76 @@
+-- Load Luna Interface Suite
+local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
+
+-- Load your Grow A Garden spawner
+local Spawner = loadstring(game:HttpGet("https://gitlab.com/darkdark/dark/-/raw/main/Spawner.lua"))()
+
+-- Create main window
+local Window = Luna:CreateWindow({
+    Name = "Grow A Garden Spawner",
+    Subtitle = "YT: ZuriScripts",
+    LogoID = nil,
+    LoadingEnabled = true,
+    LoadingTitle = "Grow A Garden Spawner",
+    LoadingSubtitle = "Made by ZuriScripts"
+})
+
+--==============================
+-- Pets Spawner Tab
+--==============================
+local Tab = Window:CreateTab({
+    Name = "Pets",
+    Icon = "pets",
+    ShowTitle = true
+})
+
+-- Default pet values
+local petWeight = 1
+local petAge = 2
+
+--==============================
+-- Pet Property Sliders at the Top
+--==============================
+Tab:CreateSlider({
+    Name = "Pet Weight (KG)",
+    Range = {1, 20}, -- You can adjust max weight
+    Increment = 1,
+    CurrentValue = petWeight,
+    Callback = function(value)
+        petWeight = value
+    end
+})
+
+Tab:CreateSlider({
+    Name = "Pet Age",
+    Range = {1, 10}, -- Adjust max age
+    Increment = 1,
+    CurrentValue = petAge,
+    Callback = function(value)
+        petAge = value
+    end
+})
+
+--==============================
+-- Function to spawn pets with current weight and age
+--==============================
+local function spawnPet(petName)
+    Spawner.SpawnPet(petName, petWeight, petAge)
+    Luna:Notification({
+        Title = "Pet Spawned",
+        Content = petName .. " has been spawned!\nWeight: " .. petWeight .. " KG | Age: " .. petAge,
+        Icon = "pets"
+    })
+end
+
+--==============================
+-- Pets Section
+--==============================
+Tab:CreateSection("Pets")
+for _, pet in ipairs(Spawner.GetPets()) do
+    Tab:CreateButton({
+        Name = "Spawn " .. pet,
+        Callback = function()
+            spawnPet(pet)
+        end
+    })
+end
