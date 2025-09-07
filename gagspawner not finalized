@@ -1,7 +1,7 @@
 -- Load Luna Interface Suite
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/refs/heads/master/source.lua", true))()
 
--- Load your Grow A Garden spawner
+-- Load Grow A Garden spawner
 local Spawner = loadstring(game:HttpGet("https://gitlab.com/darkdark/dark/-/raw/main/Spawner.lua"))()
 
 -- Create main window
@@ -23,35 +23,58 @@ local Tab = Window:CreateTab({
     ShowTitle = true
 })
 
+-- Fix for tab shine/glow
+local TweenService = game:GetService("TweenService")
+if Tab._TabButton then
+    Tab._TabButton.MouseButton1Click:Connect(function()
+        task.delay(0.05, function()
+            if Tab._Frame then
+                local tween = TweenService:Create(Tab._Frame, TweenInfo.new(0.15), {BackgroundTransparency = 1})
+                tween:Play()
+            end
+        end)
+    end)
+end
+
 -- Default pet values
 local petWeight = 1
 local petAge = 2
 
 --==============================
--- Pet Property Sliders at the Top
+-- Pet Property Input Boxes
 --==============================
-Tab:CreateSlider({
+Tab:CreateInput({
     Name = "Pet Weight (KG)",
-    Range = {1, 20}, -- You can adjust max weight
-    Increment = 1,
-    CurrentValue = petWeight,
+    PlaceholderText = "Enter weight in KG",
+    CurrentValue = tostring(petWeight),
+    Numeric = true,
     Callback = function(value)
-        petWeight = value
+        local num = tonumber(value)
+        if num and num > 0 then
+            petWeight = num
+        else
+            petWeight = 1
+        end
     end
 })
 
-Tab:CreateSlider({
+Tab:CreateInput({
     Name = "Pet Age",
-    Range = {1, 10}, -- Adjust max age
-    Increment = 1,
-    CurrentValue = petAge,
+    PlaceholderText = "Enter pet age",
+    CurrentValue = tostring(petAge),
+    Numeric = true,
     Callback = function(value)
-        petAge = value
+        local num = tonumber(value)
+        if num and num > 0 then
+            petAge = num
+        else
+            petAge = 1
+        end
     end
 })
 
 --==============================
--- Function to spawn pets with current weight and age
+-- Function to spawn pets with typed weight and age
 --==============================
 local function spawnPet(petName)
     Spawner.SpawnPet(petName, petWeight, petAge)
@@ -63,10 +86,16 @@ local function spawnPet(petName)
 end
 
 --==============================
--- Pets Section
+-- Pets Section (Alphabetically Sorted)
 --==============================
 Tab:CreateSection("Pets")
-for _, pet in ipairs(Spawner.GetPets()) do
+
+local pets = Spawner.GetPets()
+table.sort(pets, function(a, b)
+    return a:lower() < b:lower()
+end)
+
+for _, pet in ipairs(pets) do
     Tab:CreateButton({
         Name = "Spawn " .. pet,
         Callback = function()
